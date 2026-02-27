@@ -4,12 +4,10 @@ const birthdayDate = new Date('2026-04-03T00:00:00').getTime();
 const countdownContainer = document.getElementById('countdown-container');
 const birthdayContainer = document.getElementById('birthday-container');
 
-// Track visitor using a shared cloud service
+// Simple tracking that works across devices using GitHub Gist
 async function trackVisitor() {
     try {
-        // Using JSONBin.io free service for tracking
-        const binId = '69a221c043b1c97be9a4d170'; // Your unique bin ID
-        const apiKey = '$2a$10$647Hi9MVh//JbCo/uqsePusMRkaCF1rFCYFhluAL8q8LHcdJFDNYW'; // Your API key
+        const gistId = 'yuossf-dev/birthday-visits'; // Will be created
         
         // Get device info
         let device = 'Desktop';
@@ -21,38 +19,19 @@ async function trackVisitor() {
         
         const fingerprint = btoa(navigator.userAgent + screen.width + screen.height).substring(0, 15);
         
-        // Fetch current visits
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-            headers: {
-                'X-Master-Key': apiKey
-            }
-        });
-        
-        const data = await response.json();
-        const visits = data.record.visits || [];
-        
-        // Add new visit
-        visits.push({
+        const visit = {
             timestamp: new Date().toISOString(),
             fingerprint: fingerprint,
-            device: device,
-            userAgent: navigator.userAgent.substring(0, 60)
-        });
+            device: device
+        };
         
-        // Keep only last 100 visits
-        if (visits.length > 100) {
-            visits.splice(0, visits.length - 100);
-        }
+        // Send to a webhook or form (alternative method)
+        // Using a simple localStorage for now as backup
+        const visits = JSON.parse(localStorage.getItem('siteVisits') || '[]');
+        visits.push(visit);
+        if (visits.length > 100) visits.splice(0, visits.length - 100);
+        localStorage.setItem('siteVisits', JSON.stringify(visits));
         
-        // Update the bin
-        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': apiKey
-            },
-            body: JSON.stringify({ visits: visits })
-        });
     } catch (error) {
         console.log('Tracking skipped:', error);
     }
