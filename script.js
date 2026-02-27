@@ -8,8 +8,8 @@ const birthdayContainer = document.getElementById('birthday-container');
 async function trackVisitor() {
     try {
         // Using JSONBin.io free service for tracking
-        const binId = '6799c2d3ad19ca34f8e8f10e'; // Your unique bin ID
-        const apiKey = '$2a$10$vHVyJ8zQxH5xKxKxCUqH4.LM9lYWq5H8YqK7xN1F2dT3pC5mA4B6e'; // Read-only key
+        const binId = '69a221c043b1c97be9a4d170'; // Your unique bin ID
+        const apiKey = '$2a$10$647Hi9MVh//JbCo/uqsePusMRkaCF1rFCYFhluAL8q8LHcdJFDNYW'; // Your API key
         
         // Get device info
         let device = 'Desktop';
