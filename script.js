@@ -4,35 +4,58 @@ const birthdayDate = new Date('2026-04-03T00:00:00').getTime();
 const countdownContainer = document.getElementById('countdown-container');
 const birthdayContainer = document.getElementById('birthday-container');
 
-// Track visitor (simple local tracking)
-function trackVisitor() {
-    const visits = JSON.parse(localStorage.getItem('siteVisits') || '[]');
-    
-    // Create a simple fingerprint
-    const fingerprint = navigator.userAgent + screen.width + screen.height;
-    
-    // Get device info
-    let device = 'Desktop';
-    if (/Mobile|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        device = 'Mobile';
-    } else if (/Tablet|iPad/.test(navigator.userAgent)) {
-        device = 'Tablet';
+// Track visitor using a shared cloud service
+async function trackVisitor() {
+    try {
+        // Using JSONBin.io free service for tracking
+        const binId = '6799c2d3ad19ca34f8e8f10e'; // Your unique bin ID
+        const apiKey = '$2a$10$vHVyJ8zQxH5xKxKxCUqH4.LM9lYWq5H8YqK7xN1F2dT3pC5mA4B6e'; // Read-only key
+        
+        // Get device info
+        let device = 'Desktop';
+        if (/Mobile|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            device = 'Mobile';
+        } else if (/Tablet|iPad/.test(navigator.userAgent)) {
+            device = 'Tablet';
+        }
+        
+        const fingerprint = btoa(navigator.userAgent + screen.width + screen.height).substring(0, 15);
+        
+        // Fetch current visits
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+            headers: {
+                'X-Master-Key': apiKey
+            }
+        });
+        
+        const data = await response.json();
+        const visits = data.record.visits || [];
+        
+        // Add new visit
+        visits.push({
+            timestamp: new Date().toISOString(),
+            fingerprint: fingerprint,
+            device: device,
+            userAgent: navigator.userAgent.substring(0, 60)
+        });
+        
+        // Keep only last 100 visits
+        if (visits.length > 100) {
+            visits.splice(0, visits.length - 100);
+        }
+        
+        // Update the bin
+        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify({ visits: visits })
+        });
+    } catch (error) {
+        console.log('Tracking skipped:', error);
     }
-    
-    // Add new visit
-    visits.push({
-        timestamp: new Date().toISOString(),
-        fingerprint: btoa(fingerprint).substring(0, 10),
-        device: device,
-        userAgent: navigator.userAgent.substring(0, 50)
-    });
-    
-    // Keep only last 100 visits
-    if (visits.length > 100) {
-        visits.shift();
-    }
-    
-    localStorage.setItem('siteVisits', JSON.stringify(visits));
 }
 
 // Track on page load

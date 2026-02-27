@@ -170,48 +170,64 @@
     </div>
 
     <script>
-        // Simple visitor tracking (stored locally)
-        function loadVisitors() {
-            const visits = JSON.parse(localStorage.getItem('siteVisits') || '[]');
-            
-            // Update stats
-            document.getElementById('totalVisits').textContent = visits.length;
-            
-            // Count unique visitors (by a simple fingerprint)
-            const uniqueCount = new Set(visits.map(v => v.fingerprint)).size;
-            document.getElementById('uniqueVisitors').textContent = uniqueCount;
-            
-            // Last visit
-            if (visits.length > 0) {
-                const lastVisit = new Date(visits[visits.length - 1].timestamp);
-                document.getElementById('lastVisit').textContent = formatTimeAgo(lastVisit);
-            }
-            
-            // Render visitor list
-            const listEl = document.getElementById('visitorsList');
-            
-            if (visits.length === 0) {
-                listEl.innerHTML = '<div class="no-data">No visitors yet. Waiting for someone to visit the site...</div>';
-                return;
-            }
-            
-            listEl.innerHTML = visits.slice().reverse().map((visit, index) => {
-                const time = new Date(visit.timestamp);
-                const isRecent = (Date.now() - time.getTime()) < 60000; // Last minute
+        const binId = '6799c2d3ad19ca34f8e8f10e';
+        const apiKey = '$2a$10$vHVyJ8zQxH5xKxKxCUqH4.LM9lYWq5H8YqK7xN1F2dT3pC5mA4B6e';
+        
+        // Load visitor data from JSONBin
+        async function loadVisitors() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
                 
-                return `
-                    <div class="visitor-item">
-                        <div class="visitor-info">
-                            <div>
-                                ${isRecent ? '<span class="online-indicator"></span>' : ''}
-                                <strong>Visit #${visits.length - index}</strong>
+                const data = await response.json();
+                const visits = data.record.visits || [];
+                
+                // Update stats
+                document.getElementById('totalVisits').textContent = visits.length;
+                
+                // Count unique visitors (by fingerprint)
+                const uniqueCount = new Set(visits.map(v => v.fingerprint)).size;
+                document.getElementById('uniqueVisitors').textContent = uniqueCount;
+                
+                // Last visit
+                if (visits.length > 0) {
+                    const lastVisit = new Date(visits[visits.length - 1].timestamp);
+                    document.getElementById('lastVisit').textContent = formatTimeAgo(lastVisit);
+                }
+                
+                // Render visitor list
+                const listEl = document.getElementById('visitorsList');
+                
+                if (visits.length === 0) {
+                    listEl.innerHTML = '<div class="no-data">No visitors yet. Waiting for someone to visit the site...</div>';
+                    return;
+                }
+                
+                listEl.innerHTML = visits.slice().reverse().map((visit, index) => {
+                    const time = new Date(visit.timestamp);
+                    const isRecent = (Date.now() - time.getTime()) < 60000; // Last minute
+                    
+                    return `
+                        <div class="visitor-item">
+                            <div class="visitor-info">
+                                <div>
+                                    ${isRecent ? '<span class="online-indicator"></span>' : ''}
+                                    <strong>Visit #${visits.length - index}</strong>
+                                </div>
+                                <div class="visitor-time">🕐 ${formatDateTime(time)}</div>
+                                <div class="device-info">📱 ${visit.device || 'Unknown Device'}</div>
                             </div>
-                            <div class="visitor-time">🕐 ${formatDateTime(time)}</div>
-                            <div class="device-info">📱 ${visit.device || 'Unknown Device'}</div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load visitors:', error);
+                document.getElementById('visitorsList').innerHTML = 
+                    '<div class="no-data">⚠️ Error loading data. Please refresh the page.</div>';
+            }
         }
         
         function formatDateTime(date) {
