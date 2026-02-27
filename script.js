@@ -4,6 +4,40 @@ const birthdayDate = new Date('2026-04-03T00:00:00').getTime();
 const countdownContainer = document.getElementById('countdown-container');
 const birthdayContainer = document.getElementById('birthday-container');
 
+// Track visitor (simple local tracking)
+function trackVisitor() {
+    const visits = JSON.parse(localStorage.getItem('siteVisits') || '[]');
+    
+    // Create a simple fingerprint
+    const fingerprint = navigator.userAgent + screen.width + screen.height;
+    
+    // Get device info
+    let device = 'Desktop';
+    if (/Mobile|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        device = 'Mobile';
+    } else if (/Tablet|iPad/.test(navigator.userAgent)) {
+        device = 'Tablet';
+    }
+    
+    // Add new visit
+    visits.push({
+        timestamp: new Date().toISOString(),
+        fingerprint: btoa(fingerprint).substring(0, 10),
+        device: device,
+        userAgent: navigator.userAgent.substring(0, 50)
+    });
+    
+    // Keep only last 100 visits
+    if (visits.length > 100) {
+        visits.shift();
+    }
+    
+    localStorage.setItem('siteVisits', JSON.stringify(visits));
+}
+
+// Track on page load
+trackVisitor();
+
 function updateCountdown() {
     const now = new Date().getTime();
     const distance = birthdayDate - now;

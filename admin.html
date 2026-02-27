@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Birthday Site</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .visitors-list {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .visitors-list h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .visitor-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .visitor-info {
+            flex: 1;
+        }
+
+        .visitor-time {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .visitor-ip {
+            font-family: monospace;
+            opacity: 0.7;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+            font-size: 1.2rem;
+        }
+
+        .online-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .device-info {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎂 Birthday Site Admin Panel</h1>
+        
+        <button class="refresh-btn" onclick="loadVisitors()">🔄 Refresh Data</button>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Visits</div>
+                <div class="stat-number" id="totalVisits">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Unique Visitors</div>
+                <div class="stat-number" id="uniqueVisitors">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Last Visit</div>
+                <div class="stat-number" id="lastVisit" style="font-size: 1.5rem;">Never</div>
+            </div>
+        </div>
+
+        <div class="visitors-list">
+            <h2>📊 Recent Visitors</h2>
+            <div id="visitorsList">
+                <div class="no-data">No visitors yet. Waiting for someone to visit the site...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple visitor tracking (stored locally)
+        function loadVisitors() {
+            const visits = JSON.parse(localStorage.getItem('siteVisits') || '[]');
+            
+            // Update stats
+            document.getElementById('totalVisits').textContent = visits.length;
+            
+            // Count unique visitors (by a simple fingerprint)
+            const uniqueCount = new Set(visits.map(v => v.fingerprint)).size;
+            document.getElementById('uniqueVisitors').textContent = uniqueCount;
+            
+            // Last visit
+            if (visits.length > 0) {
+                const lastVisit = new Date(visits[visits.length - 1].timestamp);
+                document.getElementById('lastVisit').textContent = formatTimeAgo(lastVisit);
+            }
+            
+            // Render visitor list
+            const listEl = document.getElementById('visitorsList');
+            
+            if (visits.length === 0) {
+                listEl.innerHTML = '<div class="no-data">No visitors yet. Waiting for someone to visit the site...</div>';
+                return;
+            }
+            
+            listEl.innerHTML = visits.slice().reverse().map((visit, index) => {
+                const time = new Date(visit.timestamp);
+                const isRecent = (Date.now() - time.getTime()) < 60000; // Last minute
+                
+                return `
+                    <div class="visitor-item">
+                        <div class="visitor-info">
+                            <div>
+                                ${isRecent ? '<span class="online-indicator"></span>' : ''}
+                                <strong>Visit #${visits.length - index}</strong>
+                            </div>
+                            <div class="visitor-time">🕐 ${formatDateTime(time)}</div>
+                            <div class="device-info">📱 ${visit.device || 'Unknown Device'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function formatDateTime(date) {
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            return Math.floor(seconds / 86400) + 'd ago';
+        }
+        
+        // Auto-refresh every 5 seconds
+        setInterval(loadVisitors, 5000);
+        
+        // Initial load
+        loadVisitors();
+    </script>
+</body>
+</html>
