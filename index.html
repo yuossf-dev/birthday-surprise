@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! 🎂</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="video-background">
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="background-video.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+    
+    <div id="countdown-container" class="container">
+        <div class="countdown-area">
+            <div class="dudu-bubu-sad">
+                <img src="dudu.png" alt="Dudu" class="character dudu-img">
+                <div class="broken-heart">💔</div>
+                <img src="bubu.png" alt="Bubu" class="character bubu-img">
+            </div>
+            <div id="countdown">
+                <div class="time-box">
+                    <span id="days">00</span>
+                    <span class="label">Days</span>
+                </div>
+                <div class="time-box">
+                    <span id="hours">00</span>
+                    <span class="label">Hours</span>
+                </div>
+                <div class="time-box">
+                    <span id="minutes">00</span>
+                    <span class="label">Minutes</span>
+                </div>
+                <div class="time-box">
+                    <span id="seconds">00</span>
+                    <span class="label">Seconds</span>
+                </div>
+            </div>
+            <p class="wait-message">Please wait... it'll be worth it! 💖</p>
+        </div>
+    </div>
+
+    <div id="birthday-container" class="container hidden">
+        <div class="dudu-bubu-apart">
+            <img src="dudu.png" alt="Dudu" class="character-left dudu-alone-img">
+            <div class="broken-hearts-fall"></div>
+            <img src="bubu.png" alt="Bubu" class="character-right bubu-alone-img">
+        </div>
+        <h1 class="birthday-title">🎂 Happy Birthday 🎂</h1>
+        <div class="content">
+            <p class="birthday-message">
+                I don't have hate in my heart — just memories. Memories of the way we used to talk for hours, the way I cared without holding back, and the way I truly believed I would be there on days like this.
+            </p>
+            <p class="birthday-message">
+                I once imagined celebrating this day beside you, being the one who makes you smile first. Instead, I'm standing at a distance, wishing you well in a way I never thought I would have to.
+            </p>
+            <p class="birthday-message">
+                I won't lie — being with you wasn't always easy for me. There were moments when you made me feel jealous in ways that drove me crazy. Not because I didn't trust you, but because I cared too much. Sometimes it felt like my feelings were being tested, and I was fighting battles inside my head that I never wanted to fight. I wish you understood how much that affected me.
+            </p>
+            <p class="birthday-message">
+                Still, I hope this year brings you clarity, peace, and the happiness you were searching for when you chose to let me go. I hope you find everything you felt was missing — even if that meant it wasn't me.
+            </p>
+            <p class="birthday-message">
+                Despite everything, I truly wish you a beautiful day. Some feelings don't turn into hate… they just turn into quiet memories.
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
